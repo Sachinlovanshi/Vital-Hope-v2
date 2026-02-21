@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Vital Hope is a full-stack healthcare assistance platform designed to help patients quickly find nearby hospitals, check real-time bed availability, consult medical experts via live video, and get assistance with billing policies and treatment support.",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
     "start": "node server.js"
   },
   "repository": {
@@ -14,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  
   "bugs": {
     "url": "https://github.com/Sachinlovanshi/Vital-Hope-v2/issues"
   },
