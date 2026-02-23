@@ -1,0 +1,17 @@
+🧪 TEST REAL-TIME
+
+Open two terminals.
+
+In frontend later we will:
+
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:5000");
+
+socket.on("bedUpdated", (data) => {
+  console.log("Bed updated:", data);
+});
+
+
+Now when admin updates bed:
+All clients instantly receive update.

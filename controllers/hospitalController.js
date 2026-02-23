@@ -1,4 +1,5 @@
 import Hospital from "../models/Hospital.js";
+import { io } from "../server.js";
 
 export const registerHospital = async (req, res) => {
   try {
@@ -57,6 +58,10 @@ export const updateBeds = async (req, res) => {
       { availableBeds },
       { new: true }
     );
+
+    // Emit real-time update
+    io.emit("bedUpdated", hospital);
+
 
     res.json(hospital);
   } catch (error) {
