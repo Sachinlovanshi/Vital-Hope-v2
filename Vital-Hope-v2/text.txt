@@ -15,3 +15,11 @@ socket.on("bedUpdated", (data) => {
 
 Now when admin updates bed:
 All clients instantly receive update.
+
+
+
+Now when frontend connects:
+
+It must emit:
+
+socket.emit("registerSocket", { userId });
