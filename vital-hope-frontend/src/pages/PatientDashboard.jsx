@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../api/axios";
 import socket from "../socket/socket";
 import { useNavigate } from "react-router-dom";
-
+import Chatbot from "../components/Chatbot";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
 function PatientDashboard() {
@@ -97,9 +97,32 @@ function PatientDashboard() {
               </Popup>
             </Marker>
           ))}
+          
         </MapContainer>
       )}
+       <h3>Hospital AI Assistant</h3>
+<Chatbot />
+<h3>Hospital Bed Availability</h3>
+
+{hospitals.map((h) => (
+
+  <div key={h._id} style={{
+    border:"1px solid gray",
+    padding:"10px",
+    marginTop:"10px"
+  }}>
+
+    <h4>{h.name}</h4>
+
+    <p>Available Beds: {h.availableBeds}</p>
+
+    <p>ICU Beds: {h.icuBeds}</p>
+
+  </div>
+
+))}
     </div>
+    
   );
 }
 

@@ -4,7 +4,8 @@ import {
   getNearbyHospitals,
   updateBeds
 } from "../controllers/hospitalController.js";
-
+import upload from "../middleware/uploadMiddleware.js";
+import { uploadBrochure } from "../controllers/hospitalController.js";
 import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -23,6 +24,14 @@ router.put(
   protect,
   authorize("admin"),
   updateBeds
+);
+
+router.post(
+  "/upload-brochure",
+  protect,
+  authorize("admin"),
+  upload.single("file"),
+  uploadBrochure
 );
 
 export default router;

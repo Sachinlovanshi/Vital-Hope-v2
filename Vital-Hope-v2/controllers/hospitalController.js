@@ -1,24 +1,39 @@
 import Hospital from "../models/Hospital.js";
 import { io } from "../server.js";
+import axios from "axios";
+import FormData from "form-data";
+import fs from "fs";
 
 export const registerHospital = async (req, res) => {
   try {
-    const { name, address, latitude, longitude, totalBeds, icuBeds } =
-      req.body;
+
+    const {
+      name,
+      address,
+      latitude,
+      longitude,
+      totalBeds,
+      icuBeds
+    } = req.body;
 
     const hospital = await Hospital.create({
       name,
       address,
+      admin: req.user._id,
       location: {
         type: "Point",
-        coordinates: [longitude, latitude]
+        coordinates: [
+          parseFloat(longitude),
+          parseFloat(latitude)
+        ]
       },
       totalBeds,
       availableBeds: totalBeds,
       icuBeds
     });
 
-    res.status(201).json(hospital);
+    res.json(hospital);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -66,5 +81,29 @@ export const updateBeds = async (req, res) => {
     res.json(hospital);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const uploadBrochure = async (req, res) => {
+  try {
+
+    const filePath = req.file.path;
+
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(filePath));
+
+    await axios.post(
+      "http://localhost:8000/upload-brochure",
+      formData,
+      {
+        headers: formData.getHeaders()
+      }
+    );
+
+    res.json({ message: "Brochure uploaded and processed" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Upload failed" });
   }
 };

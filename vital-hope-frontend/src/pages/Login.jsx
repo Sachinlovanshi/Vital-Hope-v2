@@ -25,6 +25,9 @@ function Login() {
       } else if (data.user.role === "expert") {
         navigate("/expert");
       }
+      else if (data.user.role === "admin") {
+  navigate("/admin");
+}
 
     } catch (err) {
       alert("Login failed");

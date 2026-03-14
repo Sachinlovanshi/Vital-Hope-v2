@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import PatientDashboard from "./pages/PatientDashboard";
 import ExpertDashboard from "./pages/ExpertDashboard";
 import VideoCall from "./pages/VideoCall";
+import AdminDashboard from "./pages/AdminDashboard";
+import RegisterHospital from "./pages/RegisterHospital";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <Route path="/patient" element={<PatientDashboard />} />
           <Route path="/expert" element={<ExpertDashboard />} />
           <Route path="/video/:roomId" element={<VideoCall />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+         <Route path="/register-hospital" element={<RegisterHospital />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
