@@ -10,6 +10,8 @@ import hospitalRoutes from "./routes/hospitalRoutes.js";
 import consultationRoutes from "./routes/consultationRoutes.js";
 import User from "./models/User.js";
 import chatbotRoutes from "./routes/chatbotRoutes.js";
+import drugRoutes from "./routes/drugRoutes.js";
+
 
 dotenv.config();
 connectDB();
@@ -31,6 +33,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/consultations", consultationRoutes);
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/drug", drugRoutes);
 
 app.get("/", (req, res) => {
   res.send("Vital Hope API Running");

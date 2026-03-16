@@ -1,0 +1,6 @@
+fever,cough,headache,fatigue,disease,drug
+1,1,1,1,Flu,Paracetamol
+1,1,0,0,Cold,Antihistamine
+0,0,1,1,Migraine,Ibuprofen
+1,0,1,1,Dengue,Acetaminophen
+0,1,0,1,Bronchitis,Bronchodilator
