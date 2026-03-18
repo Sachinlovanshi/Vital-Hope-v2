@@ -5,32 +5,23 @@ import pandas as pd
 app = FastAPI()
 
 model = joblib.load("model.joblib")
-
-drug_map = {
-    "Flu": "Paracetamol",
-    "Cold": "Antihistamine",
-    "Migraine": "Ibuprofen",
-    "Dengue": "Acetaminophen",
-    "Bronchitis": "Bronchodilator"
-}
+symptoms = joblib.load("symptoms.joblib")
 
 @app.post("/predict")
-
 def predict(data: dict):
 
-    fever = data["fever"]
-    cough = data["cough"]
-    headache = data["headache"]
-    fatigue = data["fatigue"]
+    # Create empty input
+    input_data = {symptom: 0 for symptom in symptoms}
 
-    input_data = pd.DataFrame([[fever,cough,headache,fatigue]],
-                              columns=["fever","cough","headache","fatigue"])
+    # Mark selected symptoms
+    for symptom in data["symptoms"]:
+        if symptom in input_data:
+            input_data[symptom] = 1
 
-    disease = model.predict(input_data)[0]
+    df = pd.DataFrame([input_data])
 
-    drug = drug_map[disease]
+    prediction = model.predict(df)[0]
 
     return {
-        "disease": disease,
-        "recommended_drug": drug
+        "predicted_disease": prediction
     }
