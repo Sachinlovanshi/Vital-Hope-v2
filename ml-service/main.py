@@ -7,13 +7,22 @@ app = FastAPI()
 model = joblib.load("model.joblib")
 symptoms = joblib.load("symptoms.joblib")
 
+
+@app.get("/symptoms")
+def get_symptoms():
+    return {
+        "symptoms": symptoms
+    }
+
+
 @app.post("/predict")
 def predict(data: dict):
 
-    # Create empty input
-    input_data = {symptom: 0 for symptom in symptoms}
+    input_data = {
+        symptom: 0
+        for symptom in symptoms
+    }
 
-    # Mark selected symptoms
     for symptom in data["symptoms"]:
         if symptom in input_data:
             input_data[symptom] = 1

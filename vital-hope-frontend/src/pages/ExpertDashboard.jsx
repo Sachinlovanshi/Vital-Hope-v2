@@ -5,24 +5,28 @@ import { useNavigate } from "react-router-dom";
 
 function ExpertDashboard() {
 
-  const [incoming, setIncoming] = useState(null);
+  const [incoming, setIncoming] =
+    useState(null);
+
+  const [symptoms, setSymptoms] =
+    useState([]);
+
+  const [selectedSymptoms,
+    setSelectedSymptoms] = useState([]);
+
+  const [prediction,
+    setPrediction] = useState("");
+
   const navigate = useNavigate();
-
-  // Drug recommendation state
-  const [symptoms, setSymptoms] = useState({
-    fever: 0,
-    cough: 0,
-    headache: 0,
-    fatigue: 0
-  });
-
-  const [result, setResult] = useState(null);
 
   useEffect(() => {
 
-    socket.on("incomingCall", (data) => {
-      setIncoming(data);
-    });
+    socket.on("incomingCall",
+      (data) => {
+        setIncoming(data);
+      });
+
+    loadSymptoms();
 
     return () => {
       socket.off("incomingCall");
@@ -30,124 +34,167 @@ function ExpertDashboard() {
 
   }, []);
 
-  const acceptCall = async () => {
+  const loadSymptoms = async () => {
 
-    await API.post("/consultations/accept", {
-      consultationId: incoming.consultationId
-    });
+    const { data } =
+      await API.get("/drug/symptoms");
 
-    navigate(`/video/${incoming.roomId}`);
+    setSymptoms(data.symptoms);
   };
 
-  const rejectCall = async () => {
+  const toggleSymptom = (
+    symptom
+  ) => {
 
-    await API.post("/consultations/reject", {
-      consultationId: incoming.consultationId
-    });
+    if (
+      selectedSymptoms.includes(symptom)
+    ) {
 
-    setIncoming(null);
-  };
+      setSelectedSymptoms(
+        selectedSymptoms.filter(
+          s => s !== symptom
+        )
+      );
 
-  const handleChange = (e) => {
-    setSymptoms({
-      ...symptoms,
-      [e.target.name]: Number(e.target.value)
-    });
+    } else {
+
+      setSelectedSymptoms([
+        ...selectedSymptoms,
+        symptom
+      ]);
+
+    }
   };
 
   const predictDisease = async () => {
 
-    try {
-
-      const { data } = await API.post(
+    const { data } =
+      await API.post(
         "/drug/recommend",
-        symptoms
+        {
+          symptoms:
+            selectedSymptoms
+        }
       );
 
-      setResult(data);
+    setPrediction(
+      data.predicted_disease
+    );
+  };
 
-    } catch (error) {
-      alert("Prediction failed");
-    }
+  const acceptCall = async () => {
 
+    await API.post(
+      "/consultations/accept",
+      {
+        consultationId:
+          incoming.consultationId
+      }
+    );
+
+    navigate(
+      `/video/${incoming.roomId}`
+    );
+  };
+
+  const rejectCall = async () => {
+
+    await API.post(
+      "/consultations/reject",
+      {
+        consultationId:
+          incoming.consultationId
+      }
+    );
+
+    setIncoming(null);
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{
+      padding:"20px"
+    }}>
 
-      <h2>Expert Dashboard</h2>
+      <h2>
+        Expert Dashboard
+      </h2>
 
-      {/* Incoming Call Section */}
       {incoming && (
-        <div style={{ border: "1px solid gray", padding: "10px", marginBottom:"20px" }}>
-          <p>Incoming Call...</p>
+        <div>
+          <p>
+            Incoming Call...
+          </p>
 
-          <button onClick={acceptCall}>
+          <button
+            onClick={acceptCall}
+          >
             Accept
           </button>
 
-          <button onClick={rejectCall}>
+          <button
+            onClick={rejectCall}
+          >
             Reject
           </button>
         </div>
       )}
 
-      {/* Drug Recommendation Section */}
-      <div style={{ border:"1px solid #ccc", padding:"20px", marginTop:"20px", maxWidth:"400px" }}>
+      <h3>
+        Drug Recommendation
+      </h3>
 
-        <h3>Drug Recommendation System</h3>
+      <div style={{
+        display:"grid",
+        gridTemplateColumns:
+        "repeat(4,1fr)",
+        gap:"10px"
+      }}>
 
-        <label>Fever</label>
-        <select name="fever" onChange={handleChange}>
-          <option value="0">No</option>
-          <option value="1">Yes</option>
-        </select>
+        {symptoms.map(
+          symptom => (
 
-        <br/><br/>
+          <label
+            key={symptom}
+          >
+            <input
+              type="checkbox"
 
-        <label>Cough</label>
-        <select name="cough" onChange={handleChange}>
-          <option value="0">No</option>
-          <option value="1">Yes</option>
-        </select>
+              checked={
+                selectedSymptoms.includes(
+                  symptom
+                )
+              }
 
-        <br/><br/>
+              onChange={() =>
+                toggleSymptom(
+                  symptom
+                )
+              }
+            />
 
-        <label>Headache</label>
-        <select name="headache" onChange={handleChange}>
-          <option value="0">No</option>
-          <option value="1">Yes</option>
-        </select>
-
-        <br/><br/>
-
-        <label>Fatigue</label>
-        <select name="fatigue" onChange={handleChange}>
-          <option value="0">No</option>
-          <option value="1">Yes</option>
-        </select>
-
-        <br/><br/>
-
-        <button onClick={predictDisease}>
-          Predict Disease
-        </button>
-
-        {result && (
-          <div style={{ marginTop:"20px" }}>
-            <h4>Prediction Result</h4>
-
-            <p>
-              <strong>Disease:</strong> {result.disease}
-            </p>
-
-            <p>
-              <strong>Recommended Drug:</strong> {result.recommended_drug}
-            </p>
-          </div>
-        )}
-
+            {symptom}
+          </label>
+        ))}
       </div>
+
+      <button
+        onClick={
+          predictDisease
+        }
+        style={{
+          marginTop:"20px"
+        }}
+      >
+        Predict Disease
+      </button>
+
+      {prediction && (
+        <h3>
+          Prediction:
+          {" "}
+          {prediction}
+        </h3>
+      )}
 
     </div>
   );
