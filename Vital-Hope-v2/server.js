@@ -52,15 +52,25 @@ io.on("connection", (socket) => {
      Register User Socket
   ========================= */
 
-  socket.on("registerSocket", async ({ userId }) => {
-    try {
-      await User.findByIdAndUpdate(userId, {
-        socketId: socket.id
-      });
-    } catch (err) {
-      console.error("Socket registration error:", err);
-    }
-  });
+socket.on("registerSocket", async ({ userId }) => {
+  try {
+
+    console.log(
+      "Registering socket:",
+      userId,
+      socket.id
+    );
+
+    await User.findByIdAndUpdate(userId, {
+      socketId: socket.id
+    });
+
+    console.log("Socket registered");
+
+  } catch (err) {
+    console.error(err);
+  }
+});
 
   /* =========================
      Join Room

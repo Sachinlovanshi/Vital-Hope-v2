@@ -1,57 +1,77 @@
+from pypdf import PdfReader
+from langchain_text_splitters import (
+    RecursiveCharacterTextSplitter
+)
+
+from vector_store import (
+    add_documents,
+    retrieve
+)
+
+import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 
-
-from openai import OpenAI
-from pypdf import PdfReader
 load_dotenv()
 
-if not os.getenv("OPENAI_API_KEY"):
-    raise ValueError("OPENAI_API_KEY not found in environment variables")
-from vector_store import add_embedding, search
-client = OpenAI(
-    
-    api_key=os.getenv("OPENAI_API_KEY")
+genai.configure(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
+model = genai.GenerativeModel(
+    "gemini-2.5-flash"
+)
+
+
 def process_pdf(file_path):
+
     reader = PdfReader(file_path)
 
+    text = ""
+
     for page in reader.pages:
-        text = page.extract_text()
+        extracted = page.extract_text()
 
-        if not text:
-            continue
+        if extracted:
+            text += extracted
 
-        embedding = client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text
-        ).data[0].embedding
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=100
+    )
 
-        add_embedding(embedding, text)
+    chunks = splitter.split_text(text)
+
+    add_documents(chunks)
+
+    print(
+        f"{len(chunks)} chunks added to FAISS"
+    )
+
 
 def ask_question(question):
 
-    query_embedding = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=question
-    ).data[0].embedding
-
-    context = search(query_embedding)
+    context = retrieve(question)
 
     prompt = f"""
-Use the following hospital document context to answer.
+You are a hospital assistant chatbot.
+
+Answer ONLY from the brochure context.
+
+If answer is unavailable,
+say "Information not found."
 
 Context:
 {context}
 
 Question:
 {question}
+
+Answer clearly.
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role":"user","content":prompt}]
+    response = model.generate_content(
+        prompt
     )
 
-    return response.choices[0].message.content
+    return response.text
