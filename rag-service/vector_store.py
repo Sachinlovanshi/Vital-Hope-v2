@@ -15,28 +15,54 @@ documents = []
 
 def add_documents(chunks):
 
+    global documents
+
     embeddings = model.encode(chunks)
 
-    index.add(
-        np.array(embeddings).astype("float32")
-    )
+    embeddings = np.array(
+        embeddings
+    ).astype("float32")
+
+    index.add(embeddings)
 
     documents.extend(chunks)
+
+    print(
+        f"Documents stored: {len(documents)}"
+    )
 
 
 def retrieve(query, k=3):
 
-    query_embedding = model.encode([query])
+    global documents
+
+    if len(documents) == 0:
+        return []
+
+    query_embedding = model.encode(
+        [query]
+    )
+
+    query_embedding = np.array(
+        query_embedding
+    ).astype("float32")
 
     distances, indices = index.search(
-        np.array(query_embedding).astype("float32"),
-        k
+        query_embedding,
+        min(k, len(documents))
     )
 
     results = []
 
     for idx in indices[0]:
-        if idx < len(documents):
-            results.append(documents[idx])
+
+        # Safety check
+        if (
+            idx >= 0
+            and idx < len(documents)
+        ):
+            results.append(
+                documents[idx]
+            )
 
     return results
